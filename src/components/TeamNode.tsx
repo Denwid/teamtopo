@@ -70,7 +70,7 @@ export default function TeamNode({ data, selected }: NodeProps<Node<TeamNodeData
   };
 
   return (
-    <div className={`relative ${locked ? 'opacity-80' : ''}`}>
+    <div className={`group relative ${locked ? 'opacity-80' : ''}`}>
       <svg width="150" height="50" className="drop-shadow-sm overflow-visible">
         {renderShape()}
       </svg>
@@ -81,9 +81,9 @@ export default function TeamNode({ data, selected }: NodeProps<Node<TeamNodeData
       </div>
 
       {/* Target handle - usually top */}
-      <Handle type="target" position={Position.Top} className="w-2 h-2 !bg-gray-400 opacity-0 group-hover:opacity-100" />
+      <Handle type="target" position={Position.Top} id="top" className="w-2 h-2 !bg-gray-400 opacity-0 group-hover:opacity-100" />
       {/* Source handles - bottom, left, right */}
-      <Handle type="source" position={Position.Bottom} className="w-2 h-2 !bg-gray-400 opacity-0 group-hover:opacity-100" />
+      <Handle type="source" position={Position.Bottom} id="bottom" className="w-2 h-2 !bg-gray-400 opacity-0 group-hover:opacity-100" />
       <Handle type="source" position={Position.Left} id="left" className="w-2 h-2 !bg-gray-400 opacity-0 group-hover:opacity-100" />
       <Handle type="source" position={Position.Right} id="right" className="w-2 h-2 !bg-gray-400 opacity-0 group-hover:opacity-100" />
     </div>
