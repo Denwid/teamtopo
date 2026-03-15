@@ -68,21 +68,26 @@ function AppFlow() {
 
       let parentId: string | undefined = undefined;
 
+      // Calculate absolute position of node (if it already has a parent, position is relative)
+      let absoluteX = node.position.x;
+      let absoluteY = node.position.y;
+
+      if (node.parentId) {
+        const parent = nodes.find(n => n.id === node.parentId);
+        if (parent) {
+           absoluteX += parent.position.x;
+           absoluteY += parent.position.y;
+        }
+      }
+
+      const nodeCenterX = absoluteX + (node.measured?.width || 150) / 2;
+      const nodeCenterY = absoluteY + (node.measured?.height || 50) / 2;
+
+      let targetGroup: AppNode | undefined = undefined;
+
       // Basic bounding box intersection check
       for (const group of groups) {
         if (!group.measured?.width || !group.measured?.height) continue;
-
-        // Calculate absolute position of node (if it already has a parent, position is relative)
-        let absoluteX = node.position.x;
-        let absoluteY = node.position.y;
-
-        if (node.parentId) {
-          const parent = nodes.find(n => n.id === node.parentId);
-          if (parent) {
-             absoluteX += parent.position.x;
-             absoluteY += parent.position.y;
-          }
-        }
 
         // Group position is absolute since groups can't have parents currently
         const groupLeft = group.position.x;
@@ -91,15 +96,13 @@ function AppFlow() {
         const groupBottom = groupTop + group.measured.height;
 
         // Is node center inside the group?
-        const nodeCenterX = absoluteX + (node.measured?.width || 150) / 2;
-        const nodeCenterY = absoluteY + (node.measured?.height || 50) / 2;
-
         if (
           nodeCenterX > groupLeft &&
           nodeCenterX < groupRight &&
           nodeCenterY > groupTop &&
           nodeCenterY < groupBottom
         ) {
+          targetGroup = group;
           parentId = group.id;
           break; // Assign to first group found
         }
@@ -110,23 +113,17 @@ function AppFlow() {
         const updatedNode = { ...node, parentId };
 
         // If assigning a new parent, convert position to relative
-        if (parentId) {
-           const parent = nodes.find(n => n.id === parentId);
-           if (parent) {
-             updatedNode.position = {
-               x: node.position.x - parent.position.x,
-               y: node.position.y - parent.position.y,
-             };
-           }
+        if (parentId && targetGroup) {
+           updatedNode.position = {
+             x: absoluteX - targetGroup.position.x,
+             y: absoluteY - targetGroup.position.y,
+           };
         } else if (node.parentId) {
            // If removing parent, convert position to absolute
-           const oldParent = nodes.find(n => n.id === node.parentId);
-           if (oldParent) {
-             updatedNode.position = {
-               x: node.position.x + oldParent.position.x,
-               y: node.position.y + oldParent.position.y,
-             };
-           }
+           updatedNode.position = {
+             x: absoluteX,
+             y: absoluteY,
+           };
         }
 
         setNodes(nodes.map(n => n.id === node.id ? updatedNode : n));
